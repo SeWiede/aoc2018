@@ -8,23 +8,6 @@
 
 int field[FIELDSIZE][FIELDSIZE];
 
-void fill(int x, int y, int fc){
-	if(x < 0 || y <0 || y >= FIELDSIZE || x >= FIELDSIZE)
-		return;
-
-	printf("x: %d, y:%d\n", x,y);
-
-	if(field[x][y] == fc){
-		field[x][y] = -1;
-		fill(x-1, y, fc);
-		fill(x, y+1, fc);
-		fill(x, y-1, fc);
-		fill(x+1, y, fc);
-
-	}
-		
-}
-
 void printField(){
 	for(int i=0; i<FIELDSIZE;i++){
 		for(int j=0;j<FIELDSIZE;j++){
@@ -51,6 +34,8 @@ int main(int argc, char * args[]){
 	uint16_t count=0;
 
 	while(fgets(buf, sizeof(char)*100, stdin) != NULL){
+		char * temp = buf;
+		if(buf[0] != '#') continue;
 		char delim = '#';
 		strsep(&buf, &delim);
 		int claim =strtol(buf,&buf,10);
@@ -101,6 +86,7 @@ int main(int argc, char * args[]){
 				}
 			}
 		}
+		buf = temp;
 	}
 	printf("intersections %d\n", count);
 

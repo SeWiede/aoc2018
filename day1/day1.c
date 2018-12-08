@@ -99,7 +99,8 @@ int main(int argc, char * args[]){
 	for(int j =0; j<c; j++){
 		for(int i = 0; i <c; i++){
 			sum+=nums[i]; 
-			if(checkTwiceArray(&sort, sum, 0, c-1)){
+			//if(checkTwiceArray(&sort, sum, 0, c-1)){
+			if(checkTwice(&l, sum)){
 				printf("first double freq: %d\n", sum);
 				return 0;
 			}
