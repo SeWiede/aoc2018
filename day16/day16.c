@@ -5,13 +5,16 @@
 #include <string.h>
 
 
+#define REGCOUNT 4
+#define OPCODES 16
+
 struct instr{
-	int bef[4];
+	int bef[REGCOUNT];
 	int instr[4];
-	int aft[4];
+	int aft[REGCOUNT];
 };
 
-uint16_t opcode[16];
+uint16_t opcode[OPCODES];
 
 int count1(uint16_t x){
 	int ret=0;
@@ -32,7 +35,7 @@ int pos1(uint16_t x){
 }
 
 
-int reg[4] = {0};
+int reg[REGCOUNT] = {0};
 
 void addr(int *A, int *B, int *C){
 	reg[*C] = reg[*A] + reg[*B];
@@ -99,65 +102,23 @@ void eqrr(int *A, int *B, int *C){
 }
 
 
-void (*ops[16]) (int *A, int *B, int *C) = {addr, addi, mulr, muli, banr, bani, borr, bori, setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr};
+void (*ops[OPCODES]) (int *A, int *B, int *C) = {addr, addi, mulr, muli, banr, bani, borr, bori, setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr};
 
-int checkInstr(struct instr i){
+int checkInstr(struct instr instr){
 	int ret=0;
 
-	if(i.bef[i.instr[1]] + i.bef[i.instr[2]] == i.aft[i.instr[3]]) ret++;
-	else opcode[i.instr[0]] &= 0xfffe;
-
-	if(i.bef[i.instr[1]] + i.instr[2] == i.aft[i.instr[3]]) ret++;
-	else opcode[i.instr[0]] &= 0xfffd;
-
-	if(i.bef[i.instr[1]] * i.bef[i.instr[2]] == i.aft[i.instr[3]]) ret++;
-	else opcode[i.instr[0]] &= 0xfffb;
-
-	if(i.bef[i.instr[1]] * i.instr[2] == i.aft[i.instr[3]]) ret++;
-	else opcode[i.instr[0]] &= 0xfff7;
-
-	if((i.bef[i.instr[1]] & i.bef[i.instr[2]]) == i.aft[i.instr[3]]) ret++;
-	else opcode[i.instr[0]] &= 0xffef;
-
-	if((i.bef[i.instr[1]] & i.instr[2]) == i.aft[i.instr[3]]) ret++;
-	else opcode[i.instr[0]] &= 0xffdf;
-
-	if((i.bef[i.instr[1]] | i.bef[i.instr[2]]) == i.aft[i.instr[3]]) ret++;
-	else opcode[i.instr[0]] &= 0xffbf;
-
-	if((i.bef[i.instr[1]] | i.instr[2]) == i.aft[i.instr[3]]) ret++;
-	else opcode[i.instr[0]] &= 0xff7f;
-
-	if(i.bef[i.instr[1]] == i.aft[i.instr[3]]) ret++;
-	else opcode[i.instr[0]] &= 0xfeff;
-
-	if(i.instr[1] == i.aft[i.instr[3]]) ret++;
-	else opcode[i.instr[0]] &= 0xfdff;
-
-	if(i.instr[1] > i.bef[i.instr[2]] && (i.aft[i.instr[3]] == 1)) ret++;
-	else if(i.instr[1] <= i.bef[i.instr[2]] && (i.aft[i.instr[3]] == 0)) ret++;
-	else opcode[i.instr[0]] &= 0xfbff;
-
-	if(i.bef[i.instr[1]] > i.instr[2] && (i.aft[i.instr[3]] == 1)) ret++;
-	else if(i.bef[i.instr[1]] <= i.instr[2] && (i.aft[i.instr[3]] == 0)) ret++;
-	else opcode[i.instr[0]] &= 0xf7ff;
-
-	if(i.bef[i.instr[1]] > i.bef[i.instr[2]] && (i.aft[i.instr[3]] == 1)) ret++;
-	else if(i.bef[i.instr[1]] <= i.bef[i.instr[2]] && (i.aft[i.instr[3]] == 0)) ret++;
-	else opcode[i.instr[0]] &= 0xefff;
-
-	if(i.instr[1] == i.bef[i.instr[2]] && (i.aft[i.instr[3]] == 1)) ret++;
-	else if(i.instr[1] != i.bef[i.instr[2]] && (i.aft[i.instr[3]] == 0)) ret++;
-	else opcode[i.instr[0]] &= 0xdfff;
-
-	if(i.bef[i.instr[1]] == i.instr[2] && (i.aft[i.instr[3]] == 1)) ret++;
-	else if(i.bef[i.instr[1]] != i.instr[2] && (i.aft[i.instr[3]] == 0)) ret++;
-	else opcode[i.instr[0]] &= 0xbfff;
-
-	if(i.bef[i.instr[1]] == i.bef[i.instr[2]] && (i.aft[i.instr[3]] == 1)) ret++;
-	else if(i.bef[i.instr[1]] != i.bef[i.instr[2]] && (i.aft[i.instr[3]] == 0)) ret++;
-	else opcode[i.instr[0]] &= 0x7fff;
-
+	for(int i=0;i<OPCODES;i++){
+		for(int j=0;j<REGCOUNT;j++){
+			reg[j] = instr.bef[j];
+		}
+		ops[i](&instr.instr[1], &instr.instr[2], &instr.instr[3]);
+		if(memcmp(reg, instr.aft, sizeof(reg)) ==0){
+			ret++;
+		}else{
+			opcode[instr.instr[0]] &= ~(1<<i);
+		}
+	}	
+	
 	return ret;
 }
 
@@ -229,10 +190,9 @@ int main(int argc, char * argv[]){
 
 	for(int i=0;i<16;i++){
 		mapper[i] = pos1(opcode[i]);
-	}
+	}	
 
-
-	
+	memset(reg, 0, sizeof(reg));
 
 	fgets(buf, 256, stdin);
 	while(fgets(buf, 256, stdin) !=NULL){
@@ -252,8 +212,6 @@ int main(int argc, char * argv[]){
 
 		buf=temp;
 	}
-
-
 
 	printf("ops that behave like 3: %d\n",  bl3);
 	
