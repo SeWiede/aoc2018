@@ -235,7 +235,6 @@ int main(int argc, char * argv[]){
 	
 
 	fgets(buf, 256, stdin);
-	fgets(buf, 256, stdin);
 	while(fgets(buf, 256, stdin) !=NULL){
 		if(strlen(buf) < 2) break;
 		
