@@ -190,6 +190,7 @@ int main(int argc, char * argv[]){
 
 	for(int i=0;i<16;i++){
 		mapper[i] = pos1(opcode[i]);
+		printf("%d\n", mapper[i] );
 	}	
 
 	memset(reg, 0, sizeof(reg));
