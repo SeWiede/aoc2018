@@ -96,20 +96,36 @@ void eqrr(int *A, int *B, int *C){
 }
 
 void divr(int *A, int *B, int *C){
-	if(reg[*B] != 0)
+	if(reg[*B] != 0){
 		reg[*C] = reg[*A] / reg[*B];
-	else{
+	}else{
 		reg[*C] = 0;
 	}
 }
 
-void nop(int *A, int *B, int *C){
+void divi(int *A, int *B, int *C){
+	if(*B != 0){
+		reg[*C] = reg[*A] / *B;
+	}else{
+		reg[*C] = 0;
+	}
+}
+
+void modr(int *A, int *B, int *C){
+	if(reg[*B] != 0){
+		reg[*C] = reg[*A] % reg[*B];
+	}else{
+		reg[*C] = 0;
+	}
+}
+
+void nopp(int *A, int *B, int *C){
 
 }
 
 
 
-void (*ops[OPCODES+2]) (int *A, int *B, int *C) = {addr, addi, mulr, muli, banr, bani, borr, bori, setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr, divr,nop};
+void (*ops[OPCODES+4]) (int *A, int *B, int *C) = {addr, addi, mulr, muli, banr, bani, borr, bori, setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr, divr, divi, modr, nopp};
 
 int getOpcode(const char* op){
 	if(strcmp(op, "addr") == 0){
@@ -163,8 +179,14 @@ int getOpcode(const char* op){
 	if(strcmp(op, "divr") == 0){
 		return 16;
 	}
-	if(strcmp(op, "nopp") == 0){
+	if(strcmp(op, "divi") == 0){
 		return 17;
+	}
+	if(strcmp(op, "modr") == 0){
+		return 18;
+	}
+	if(strcmp(op, "nopp") == 0){
+		return 19;
 	}
 	return -1;
 }
@@ -214,6 +236,8 @@ int main(int argc, char * argv[]){
 	memset(reg, 0, sizeof(reg));
 
 	reg[0] =1;	
+
+	int pr=1;
 
 	while(reg[ipreg] < instrc){
 		int intr[4];
